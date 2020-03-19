@@ -1,2 +1,4 @@
 # ICS-sp20
-An Introduction to Computer Science learning repo
+A learning repo for Introduction to Computer Science Spring 2020.
+**William Chengyu Zhang
+
