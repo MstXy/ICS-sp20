@@ -43,10 +43,8 @@ class ClientSM:
             self.out_msg += 'User is busy. Please try again later\n'
         elif response["status"] == "self":
             self.out_msg += 'Cannot talk to yourself (sick)\n'
-        elif response["status"] == "user_in_game":
-            self.out_msg += 'User is currently in game, please wait\n'
         else:
-            self.out_msg += 'User is not available, try again later\n'
+            self.out_msg += 'User is not online, try again later\n'
         return(False)
 
     def disconnect(self):
@@ -70,6 +68,8 @@ class ClientSM:
             self.out_msg += 'User is busy. Please try again later\n'
         elif response["status"] == "self":
             self.out_msg += 'Cannot game with yourself (right now, not until we implemented bots)\n'
+        elif response["status"] == "user_in_game":
+            self.out_msg += 'User is currently in game, please wait\n'
         else:
             self.out_msg += 'User is not online, try again later\n'
         return(False)
@@ -244,13 +244,10 @@ class ClientSM:
         elif self.state == S_GAMING:
             # run game
             self.game = game.App(self.s, self.me, self.peer, self.color, self.peer_color)
-            #print(self.game._running)
-            #if self.ready_to_game == True:
             self.game.on_execute()
 
             self.out_msg += "Quited"
-            self.state = S_LOGGEDIN
-            
+            self.state = S_LOGGEDIN            
             if self.state == S_LOGGEDIN:
                 self.out_msg += menu
 #----------------------------------------------------------------------------------------------

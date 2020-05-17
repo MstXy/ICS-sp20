@@ -264,7 +264,6 @@ class App:
             self._running = False
 
         # start two seperate thread, one for recieving message, one for game loop
-        # if self.firstTime == True:
         self.receive_thread.start()
         self.looping_thread.start()
 
