@@ -18,6 +18,7 @@ CHESSCOLOR1 = (255, 42, 109)
 CHESSCOLOR2 = (5, 217, 232)
 LINECOLOR = (196, 255, 255)
 
+
 LOSECOLOR = (255, 24, 76)
 WINCOLOR = (26, 254, 73)
 QUITCOLOR = (222, 254, 71)
@@ -32,12 +33,12 @@ class App:
         self.s = s
         self.me = me
         self.peer = peer
-        
+
         self.lock = threading.Lock()
 
         self.receive_thread = threading.Thread(target=self.get_msg)
         self.receive_thread.daemon = True
-        
+
         self.looping_thread = threading.Thread(target=self.running)
         self.looping_thread.daemon = True
         #---------------
@@ -63,12 +64,14 @@ class App:
             for y in range(0,15):
                 self.all_chess['rest'].append((x,y))
 
-         
+
+
     def on_init(self):
         pygame.init()
         self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        pygame.display.set_caption('GOBANG 2077')
         # self.opacityLayer = pygame.Surface((825,825), pygame.SRCALPHA)
-        # self.opacityLayer.fill((255,255,255,128)) 
+        # self.opacityLayer.fill((255,255,255,128))
         #=================
         #self.screen.fill(WOOD)
         self.screen.fill(BACKGROUNDCOLOR)
@@ -96,9 +99,38 @@ class App:
         pygame.draw.line(self.screen, LINECOLOR, (818,818), (818,7), 2)
         pygame.draw.line(self.screen, LINECOLOR, (818,7), (7,7), 2)
 
+        fontObj0 = pygame.font.Font('fonts/Bariol-Serif-Regular-1.otf', 40)
+        if self.color == CHESSCOLOR1:
+            self.intro_t = "Your color: Magenta"
+            self.intro_c = CHESSCOLOR1
+            self.num = 'P1'
+        elif self.color == CHESSCOLOR2:
+            self.intro_t = "Your color: Cyan"
+            self.intro_c = CHESSCOLOR2
+            self.num = 'P2'
+
+        self.intro_text = fontObj0.render(self.intro_t, True, self.intro_c)
+        self.intro_rect = self.intro_text.get_rect()
+        self.intro_rect.center = (650, 25)
+        # showing intro
+        self.screen.blit(self.intro_text, self.intro_rect)
+
+        self.ord_text = fontObj0.render(self.num, True, QUITCOLOR)
+        self.ord_rect = self.ord_text.get_rect()
+        self.ord_rect.center = (25, 25)
+        # showing intro
+        self.screen.blit(self.ord_text, self.ord_rect)
+
+        fontObj00 = pygame.font.Font('fonts/WOX-Striped-Triple-Demo-1.otf', 40)
+        self.title_text = fontObj00.render("Gobang 2077", True, QUITCOLOR)
+        self.title_rect = self.title_text.get_rect()
+        self.title_rect.center = (725, 800)
+        # showing title
+        self.screen.blit(self.title_text, self.title_rect)
+
         pygame.display.flip()
 
-        fontObj = pygame.font.Font('Netron-2.otf', 50)
+        fontObj = pygame.font.Font('fonts/Netron-2.otf', 50)
 
         self.win = fontObj.render('You Win !', True, WINCOLOR)
         self.lose = fontObj.render('You Lose !', True, LOSECOLOR)
@@ -110,10 +142,15 @@ class App:
         self.win_rect.center = (412, 412)
         self.lose_rect.center = (412, 412)
 
-        fontObj2 = pygame.font.Font('Bariol-Serif-Regular-1.otf', 40)
-        self.quit_text = fontObj2.render("Press Q to quit!", True, QUITCOLOR)
+        #fontObj2 = pygame.font.Font('Bariol-Serif-Regular-1.otf', 40)
+        self.quit_text = fontObj0.render("Press Q to quit!", True, QUITCOLOR)
         self.quit_rect = self.quit_text.get_rect()
         self.quit_rect.center = (412, 550)
+
+
+
+
+
 
 
     def on_event(self, event):
@@ -134,8 +171,8 @@ class App:
             # elif event.key == pygame.K_g:
             #     mysend(self.s, json.dumps({"action":"restart_game"}))
             #     self.on_init()
-    
-        
+
+
         #mouse down
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -146,7 +183,7 @@ class App:
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 self.POS_moving = False
-            
+
 
     def get_msg(self):
         # self.lock.acquire()
@@ -175,34 +212,44 @@ class App:
             self.position = pygame.mouse.get_pos()
             self.peer_pos = False
             self.start =True
-            mysend(self.s, json.dumps({"action":"new_pos", "position":self.position}))
-    
+            x,y = self.get_code()
+            if (x,y) in self.all_chess['rest']:
+                mysend(self.s, json.dumps({"action":"new_pos", "position":self.position}))
+
+
     def on_render(self, color=WOOD):
-        x, y = self.position
-        x = x//54
-        y = y//54
-        if x == 15:
-            x = 14
-        if y == 15:
-            y = 14
-       
+
+        x, y = self.get_code()
+        '''
         #draw circle
         #pygame.draw.circle(self.screen, color, (x*55+27, y*55+27), 22, 0)
         if color == CHESSCOLOR1:
             stroke_color = (255, 117, 161)
         elif color == CHESSCOLOR2:
             stroke_color = (130, 225, 232)
-        
+
         # self.screen.blit(self.opacityLayer, (0,0))
         pygame.draw.circle(self.screen, color, (x*54+35, y*54+35), 21, 0)
         pygame.draw.circle(self.screen, stroke_color, (x*54+35, y*54+35), 22, 2)
-    
-        pygame.display.flip()  
-        
+
+        pygame.display.flip()
+        '''
         if (x,y) in self.all_chess['rest']:
             self.all_chess[color].append((x,y))
             self.all_chess['rest'].remove((x,y))
-          
+            if color == CHESSCOLOR1:
+                stroke_color = (255, 117, 161)
+            elif color == CHESSCOLOR2:
+                stroke_color = (130, 225, 232)
+
+            # self.screen.blit(self.opacityLayer, (0,0))
+            pygame.draw.circle(self.screen, color, (x*54+35, y*54+35), 21, 0)
+            pygame.draw.circle(self.screen, stroke_color, (x*54+35, y*54+35), 22, 2)
+
+            pygame.display.flip()
+            if color ==  self.color:
+                self.my_turn = False
+
 
         # self.clock.tick(60)
 
@@ -211,7 +258,7 @@ class App:
         # self.receive_thread.join(5)
         pygame.quit()
 
- 
+
     def on_execute(self):
         if self.on_init() == False:
             self._running = False
@@ -236,57 +283,75 @@ class App:
                         self.on_render(self.peer_color)
                     else:
                         self.on_render(self.color)
-                        self.my_turn = False
+                        # self.my_turn = False
             else:
                 if self.start:
                     if self.peer_pos:
                         self.on_render(self.peer_color)
                     else:
                         self.on_render(self.color)
-                    
+
             self.detect_win()
-            
-        
+
+
     def detect_win(self):
         for chess in self.all_chess[self.color]:
-            if self.detect_horizontal(chess, self.color) or self.detect_vertical(chess, self.color) or \
-               self.detect_diagonal(chess, self.color):
+            if self.detect_horizontal(chess, self.color) or \
+               self.detect_vertical(chess, self.color) or \
+               self.detect_diagonal_1(chess, self.color) or \
+               self.detect_diagonal_2(chess, self.color):
                 self.screen.blit(self.win, self.win_rect)
                 self.screen.blit(self.quit_text, self.quit_rect)
                 pygame.display.update()
                 return
         for chess in self.all_chess[self.peer_color]:
-            if self.detect_horizontal(chess, self.peer_color) or self.detect_vertical(chess, self.peer_color) or \
-               self.detect_diagonal(chess, self.peer_color):
+            if self.detect_horizontal(chess, self.peer_color) or \
+               self.detect_vertical(chess, self.peer_color) or \
+               self.detect_diagonal_1(chess, self.peer_color) or \
+               self.detect_diagonal_2(chess, self.peer_color):
                 self.screen.blit(self.lose, self.lose_rect)
                 self.screen.blit(self.quit_text, self.quit_rect)
                 pygame.display.update()
                 return
-    
+
     def detect_horizontal(self, chess, color, times = 1):
         if times == 5:
             return True
         next_chess = (chess[0]+1,chess[1])
         if next_chess in self.all_chess[color]:
             return True and self.detect_horizontal(next_chess, color, times+1)
-                
+
     def detect_vertical(self, chess, color, times = 1):
         if times == 5:
             return True
         next_chess = (chess[0],chess[1]+1)
         if next_chess in self.all_chess[color]:
             return True and self.detect_vertical(next_chess, color, times+1)
-                
-    def detect_diagonal(self, chess, color, times = 1):
+
+    def detect_diagonal_1(self, chess, color, times = 1):
         if times == 5:
             return True
         next_chess = (chess[0]+1,chess[1]+1)
         if next_chess in self.all_chess[color]:
-            return True and self.detect_diagonal(next_chess, color, times+1)
-                
+            return True and self.detect_diagonal_1(next_chess, color, times+1)
 
+    def detect_diagonal_2(self, chess, color, times = 1):
+        if times == 5:
+            return True
+        next_chess = (chess[0]+1,chess[1]-1)
+        if next_chess in self.all_chess[color]:
+            return True and self.detect_diagonal_2(next_chess, color, times+1)
+
+    def get_code(self):
+        x, y = self.position
+        x = x//54
+        y = y//54
+        if x == 15:
+            x = 14
+        if y == 15:
+            y = 14
+        return x,y
 
 # if __name__ == "__main__" :
 #     theApp = App()
 #     theApp.on_execute()
-

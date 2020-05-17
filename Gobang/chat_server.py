@@ -228,12 +228,16 @@ class Server:
                 # connect to the peer
                 elif self.gameGroup.is_member(to_name):
                     to_sock = self.logged_name2sock[to_name]
-                    self.gameGroup.connect(from_name, to_name)
-                    #the_guys = self.gameGroup.list_me(from_name)
-                    msg = json.dumps(
-                        {"action": "start_game", "status": "success"})
-                    mysend(to_sock, json.dumps(
-                        {"action": "start_game", "status": "request", "from": from_name}))
+                    # detect whether in game
+                    if len(self.gameGroup.list_me(to_name)) == 1:
+                        self.gameGroup.connect(from_name, to_name)
+                        #the_guys = self.gameGroup.list_me(from_name)
+                        msg = json.dumps(
+                            {"action": "start_game", "status": "success"})
+                        mysend(to_sock, json.dumps(
+                            {"action": "start_game", "status": "request", "from": from_name}))
+                    else:
+                        msg = json.dumps({"action": "start_game", "status": "user_in_game"})
                 else:
                     msg = json.dumps(
                         {"action": "start_game", "status": "no-user"})
